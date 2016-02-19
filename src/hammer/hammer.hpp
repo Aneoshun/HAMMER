@@ -3,7 +3,22 @@
 
 #include <fstream>
 
+
+
 #include <functional>
+
+#include <boost/parameter.hpp>
+#include <boost/fusion/include/vector.hpp>
+#include <boost/fusion/include/accumulate.hpp>
+#include <boost/fusion/include/for_each.hpp>
+#include <boost/filesystem.hpp>
+
+#include <Eigen/Core>
+#include "tbb/tbb.h"
+#include "tbb/blocked_range.h"
+
+
+
 #include <hammer/selector/confidence.hpp>
 #include <hammer/confidUpdator/distance.hpp>
 #include <hammer/stop/chain_criteria.hpp>
@@ -12,9 +27,6 @@
 #include <hammer/tools/sys.hpp>
 #include <hammer/stat.hpp>
 
-#include <Eigen/Core>
-#include "tbb/tbb.h"
-#include "tbb/blocked_range.h"
 
 namespace hammer {
 
@@ -140,6 +152,8 @@ namespace hammer {
     template<typename System>
     void run( System& system, const state_t& target,const state_t& initState)
     {
+      assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
+      this->_current_iteration=0;
       _currentState=initState;
       while (!this->_stop(*this)) {
 	this->_update_inversePredictions(_currentState,target);
@@ -158,6 +172,10 @@ namespace hammer {
     template<typename System>
     void learn( System& system, const state_t& target, const state_t& initState) // IMITATION LEARNING -->>> EXPERIMENTAL
     {
+
+      assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
+      this->_current_iteration=0;
+      
       //state_t target; // tarfet or not a target that is the question
       _currentState=initState;
       while (!this->_stop(*this)) {
