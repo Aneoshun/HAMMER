@@ -14,7 +14,7 @@ set (LIBRARY_OUTPUT_PATH ./lib)
 
 # The version number.
 set (Hammer_VERSION_MAJOR 0)
-set (Hammer_VERSION_MINOR 0)
+set (Hammer_VERSION_MINOR 1)
 
 
 # configure a header file to pass some of the CMake settings
@@ -24,15 +24,18 @@ configure_file (
   "${PROJECT_BINARY_DIR}/hammer/hammerConfig.h"
   )
 
- 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+find_package(Eigen3 REQUIRED) 
+
+
 # add the binary tree to the search path for include files
 # so that we will find TutoriConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/")
 
 
-include_directories("/usr/local/opt/eigen/include/eigen3/")
-include_directories("/Users/antoinecully/git_other/limbo/src/")
+include_directories(${EIGEN3_INCLUDE_DIR})  
+include_directories("./submodules/limbo/src/")
 
 # add the executable
 
