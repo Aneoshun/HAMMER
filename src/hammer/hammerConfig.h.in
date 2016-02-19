@@ -1,0 +1,3 @@
+// the configured options and settings for Tutorial
+#define Hammer_VERSION_MAJOR @Hammer_VERSION_MAJOR@
+#define Hammer_VERSION_MINOR @Hammer_VERSION_MINOR@
