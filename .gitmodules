@@ -1,0 +1,3 @@
+[submodule "submodules/limbo"]
+	path = submodules/limbo
+	url = https://github.com/resibots/limbo.git
