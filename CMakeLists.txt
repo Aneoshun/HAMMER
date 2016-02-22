@@ -26,23 +26,38 @@ configure_file (
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(Eigen3 REQUIRED) 
+find_package(TBB REQUIRED)
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost 1.45.0 REQUIRED COMPONENTS system filesystem ) 
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS}) 
+endif()
+
+
+
+
 
 
 # add the binary tree to the search path for include files
 # so that we will find TutoriConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/")
+include_directories("${PROJECT_SOURCE_DIR}/../submodules/limbo/src/")
 
 
 include_directories(${EIGEN3_INCLUDE_DIR})  
-include_directories("./submodules/limbo/src/")
+include_directories(${TBB_INCLUDE_DIR})  
+
 
 # add the executable
-
 add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp)
 
 # add libs
- link_directories("/usr/local/opt/tbb/lib/,/usr/local/lib/")
+link_directories("/usr/local/lib/, ${TBB_LIBRARY}")
 
 
-target_link_libraries(hammerExample tbb boost_system boost_filesystem)
+target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES})
+    
