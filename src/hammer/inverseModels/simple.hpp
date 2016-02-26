@@ -4,17 +4,15 @@
 
 namespace hammer {
   namespace inverseModels{
-    
-    template<int val>
+    template<typename Action>
     class MonoVal{
     public:
+      MonoVal(Action act):_act(act){}
       Eigen::VectorXd predict(const Eigen::VectorXd& current, const Eigen::VectorXd& target){
-	Eigen::VectorXd a(1);
-	a<<val;
-	return a;
+	return _act;
       }
       void update(const Eigen::VectorXd& prev ,const Eigen::VectorXd& action, const Eigen::VectorXd& next){}
-
+      Action _act;
     };
 
     template<typename Action= Eigen::VectorXd, typename State= Eigen::VectorXd>

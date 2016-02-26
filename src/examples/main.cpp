@@ -69,7 +69,9 @@ struct PerfectFM{
 // Definition of the problem/scenario
 template<typename State=Eigen::VectorXd, typename Action=Eigen::VectorXd>
 struct DummyGlucose{
+
   State glucose;
+
   DummyGlucose(){
     glucose=Eigen::VectorXd(1);
     glucose(0)= ((float)rand()/RAND_MAX)*8+4;
@@ -103,17 +105,42 @@ int main (int argc, char *argv[])
 {
   std::srand(std::time(NULL));
   srand(time(NULL));
+
+
+  // Instanciation of the scenario
+  DummyGlucose<> exp;
+
   
-  
+  typedef Eigen::VectorXd Action;
+  typedef Eigen::VectorXd State;
+
+
   // Instatiation of the forward models
   forwardModels::GP<Params> gp;
-  //  gp.init();
+  std::vector<Eigen::VectorXd> obs;
+  std::vector<Eigen::VectorXd> samples;
+  for(size_t i=0;i<10;i++){
+    Action a=Eigen::VectorXd(1);
+    a(0)=rand()%4+1;
+    State s=exp.glucose;
+    State ns=exp(a);
+    obs.push_back(ns);
+    Eigen::VectorXd sam(2);
+    sam<<s,a;
+    samples.push_back(sam);
+  }
+  gp.init(obs,samples);
 
   // Instantiation of the Inverse models;
-  inverseModels::MonoVal<1> im_1;
-  inverseModels::MonoVal<2> im_2;
-  inverseModels::MonoVal<3> im_3;
-  inverseModels::MonoVal<4> im_4;
+  Action v(1);
+  v(0)=1;
+  inverseModels::MonoVal<Action> im_1(v);
+  v(0)=2;
+  inverseModels::MonoVal<Action> im_2(v);
+  v(0)=3;
+  inverseModels::MonoVal<Action> im_3(v);
+  v(0)=4;
+  inverseModels::MonoVal<Action> im_4(v);
 
   // Instantiation of the architecture
   Hammer<Params, selectfun<selector::NearestTarget<Params> > > hammer;
@@ -132,9 +159,6 @@ int main (int argc, char *argv[])
   // Diplay the strcture of the architecture
   hammer.printStructure();
 
-
-  // Instanciation of the scenario
-  DummyGlucose<> exp;
   
   // Definition of the target
   Eigen::VectorXd target(1);

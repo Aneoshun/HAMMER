@@ -152,7 +152,7 @@ namespace hammer {
     template<typename System>
     void run( System& system, const state_t& target,const state_t& initState)
     {
-      assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
+      /*  assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
       this->_current_iteration=0;
       _currentState=initState;
       while (!this->_stop(*this)) {
@@ -166,9 +166,23 @@ namespace hammer {
 	_currentState=newState;
 	this->_current_iteration++;
 	this->_update_stats(*this);
-      }
-    }
+	}*/
 
+
+      assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
+      this->_current_iteration=0;
+      _currentState=initState;  
+
+      while (!this->_stop(*this)) {
+	_selectedAction=this->suggestAction(target,this->_currentState);
+	state_t newState=system(_selectedAction); 
+	updateModels(newState);
+	this->_current_iteration++;
+        this->_update_stats(*this);     
+      }
+
+    }
+    
     template<typename System>
     void learn( System& system, const state_t& target, const state_t& initState) // IMITATION LEARNING -->>> EXPERIMENTAL
     {
@@ -176,7 +190,7 @@ namespace hammer {
       assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
       this->_current_iteration=0;
       
-      //state_t target; // tarfet or not a target that is the question
+      //state_t target; // target or not a target that is the question
       _currentState=initState;
       while (!this->_stop(*this)) {
 	this->_update_inversePredictions(_currentState,target);
@@ -192,6 +206,21 @@ namespace hammer {
       }
     }
 
+     const action_t& suggestAction(const state_t& target, const state_t& currentState)
+    {
+      assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
+      this->_update_inversePredictions(currentState,target);
+      this->_update_forwardPredictions(currentState);
+      _selectedAction=_selectAction()->getAction();
+      return _selectedAction;
+    }
+
+    void updateModels(const state_t& newState)
+    {
+      this->_update_confidence(newState);
+      this->_update_models(_currentState, _selectedAction, newState);
+      _currentState=newState;
+    }
 
     template<typename T, typename... Targs>
     void bindInverseModel( T& t,  Targs&... tt )
@@ -237,6 +266,13 @@ namespace hammer {
     const std::vector< std::shared_ptr<ModelPair_t> >& getPairInterfaces() const {return _forwardModels;}
     state_t getCurrentState()const {return _currentState;}
     action_t getSelectedAction()const {return _selectedAction;}
+
+    void print_confidencePrediction()const
+    {
+      std::for_each(_forwardModels.begin(),_forwardModels.end(), [=](const std::shared_ptr<ModelPair_t>& fm ) {std::cout<<"Conf: "<<(*fm).getConfidence()<< "  Pred: "<<(*fm).getState()<<std::endl;} );
+    }
+
+
   private:
 
     template <typename HMR>
@@ -285,12 +321,6 @@ namespace hammer {
     void _update_models(const state_t&  prevstate_t, const action_t& action, const state_t& newstate_t)
     {
       tbb::parallel_for_each(_models, [=](Model_t& fm ) {fm(prevstate_t,action,newstate_t);} );
-    }
-
-
-    void _print_confidencePrediction()const
-    {
-      std::for_each(_forwardModels.begin(),_forwardModels.end(), [=](const std::shared_ptr<ModelPair_t>& fm ) {std::cout<<"Conf: "<<(*fm).getConfidence()<< "  Pred: "<<(*fm).getState()<<std::endl;} );
     }
 
     
