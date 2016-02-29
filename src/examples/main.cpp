@@ -168,9 +168,15 @@ int main (int argc, char *argv[])
 
   //Execution of the architecture
   std::cout<<"TARGET "<<Params::hammer::target()<<std::endl;    
-
-  hammer.learn(exp, Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
-  hammer.run(exp, Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
   
+  //hammer.learn(exp, Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
+  //hammer.run(exp, Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
+  
+  for(int i=0;i<100;i++)
+    {
+      Action a=hammer.suggestAction(Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
+      hammer.updateModels(exp(a));
+    }
+
   return 0;
 }

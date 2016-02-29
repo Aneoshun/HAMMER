@@ -197,7 +197,7 @@ namespace hammer {
 	this->_update_forwardPredictions(_currentState);
 	//action_t selectedAction; // same here, how do we know the executed action;
 	state_t newState=system(); 
-	this->_print_confidencePrediction();
+	this->print_confidencePrediction();
 	this->_update_confidence(newState);
 	//this->_update_models(_currentState, _selectedAction, _newState);
 	_currentState=newState;
@@ -208,6 +208,7 @@ namespace hammer {
 
      const action_t& suggestAction(const state_t& target, const state_t& currentState)
     {
+      _currentState=currentState;
       assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
       this->_update_inversePredictions(currentState,target);
       this->_update_forwardPredictions(currentState);
