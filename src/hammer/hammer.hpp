@@ -300,12 +300,12 @@ namespace hammer {
 
     void _update_inversePredictions(const state_t& current, const state_t& target) 
     { 
-      tbb::parallel_for_each(_inverseModels, [=](std::shared_ptr<IM_ITF_t > & im) {(*im)(current,target);} );
+      tbb::parallel_for_each(_inverseModels.begin(),_inverseModels.end(), [=](std::shared_ptr<IM_ITF_t > & im) {(*im)(current,target);} );
     }
 
     void _update_forwardPredictions(const state_t& current) 
     {
-      tbb::parallel_for_each(_forwardModels, [=](std::shared_ptr<ModelPair_t >& fm ) {(*fm)(current);} );
+      tbb::parallel_for_each(_forwardModels.begin(),_forwardModels.end(), [=](std::shared_ptr<ModelPair_t >& fm ) {(*fm)(current);} );
     }
 
     typename std::shared_ptr<ModelPair_t> _selectAction() const
@@ -315,13 +315,13 @@ namespace hammer {
 
     void _update_confidence(const state_t& state)
     {
-      tbb::parallel_for_each(_forwardModels, [=](std::shared_ptr<ModelPair_t >& fm ) {(*fm).udpateConfidence(state);} );
+      tbb::parallel_for_each(_forwardModels.begin(),_forwardModels.end(), [=](std::shared_ptr<ModelPair_t >& fm ) {(*fm).udpateConfidence(state);} );
     }
 
 
     void _update_models(const state_t&  prevstate_t, const action_t& action, const state_t& newstate_t)
     {
-      tbb::parallel_for_each(_models, [=](Model_t& fm ) {fm(prevstate_t,action,newstate_t);} );
+      tbb::parallel_for_each(_models.begin(),_models.end(), [=](Model_t& fm ) {fm(prevstate_t,action,newstate_t);} );
     }
 
     
