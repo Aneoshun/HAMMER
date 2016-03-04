@@ -16,6 +16,7 @@
 #include "./hammer/forwardModels/simple.hpp"
 #include "./hammer/forwardModels/gp.hpp"
 #include "./hammer/confidUpdator/distance.hpp"
+#include "./hammer/scoreUpdator/nearestTarget.hpp"
 #include "./hammer/inverseModels/simple.hpp"
 
 
@@ -142,7 +143,7 @@ int main (int argc, char *argv[])
   inverseModels::MonoVal<Action> im_4(v);
 
   // Instantiation of the architecture
-  Hammer<Params> hammer;
+  Hammer<Params,scorefun<scoreupdator::NearestTarget<Params> > > hammer;
 
  
   // Biding of the Inverse models
