@@ -19,8 +19,9 @@
 
 
 
-#include <hammer/selector/confidence.hpp>
+#include <hammer/selector/max.hpp>
 #include <hammer/confidUpdator/distance.hpp>
+#include <hammer/scoreUpdator/confidence.hpp>
 #include <hammer/stop/chain_criteria.hpp>
 #include <hammer/stop/max_iterations.hpp>
 #include <hammer/tools/macros.hpp>
@@ -63,21 +64,25 @@ namespace hammer {
   };
 
   
-  template < typename FMfun, typename Action, typename State, typename IMfun,typename ConfUpdator >
+  template < typename FMfun, typename Action, typename State, typename IMfun,typename ConfUpdator, typename ScoreUpdator >
   class PairInterface{
   public:
     PairInterface(FMfun fmfun, IMfun imfun):_fmfun(fmfun),_imfun(imfun),_confidence(0){}
     void operator()(const State& current){_state=_fmfun.operator()( this->getAction(), current);}//_imfun.operator()(), current);}
     const State& getState() const {return _state;}
     double getConfidence() const {return _confidence; }
-    void udpateConfidence(const State& state){_confidence=_updator(state,_state,_confidence); } 
+    void udpateConfidence(const State& state){_confidence=_confUpdator(state,_state,_confidence); } 
+    double getScore() const {return _confidence; }
+    void updateScore(){_score=_scoreUpdator(*this); } 
     const Action& getAction() const{return _imfun.operator()();}
   private:
     FMfun _fmfun;
     State _state;
     IMfun _imfun;
     double _confidence;
-    ConfUpdator _updator;
+    double _score;
+    ConfUpdator _confUpdator;
+    ScoreUpdator _scoreUpdator;
   };
 
 
@@ -87,12 +92,14 @@ namespace hammer {
   BOOST_PARAMETER_TEMPLATE_KEYWORD(state)  //1
   BOOST_PARAMETER_TEMPLATE_KEYWORD(action)  //2
   BOOST_PARAMETER_TEMPLATE_KEYWORD(confidfun)  //3
-  BOOST_PARAMETER_TEMPLATE_KEYWORD(selectfun)  //4
-  BOOST_PARAMETER_TEMPLATE_KEYWORD(statsfun)  //5
-  BOOST_PARAMETER_TEMPLATE_KEYWORD(stopcrit)  //6
+  BOOST_PARAMETER_TEMPLATE_KEYWORD(scorefun)  //4
+  BOOST_PARAMETER_TEMPLATE_KEYWORD(selectfun)  //5
+  BOOST_PARAMETER_TEMPLATE_KEYWORD(statsfun)  //6
+  BOOST_PARAMETER_TEMPLATE_KEYWORD(stopcrit)  //7
   typedef boost::parameter::parameters<boost::parameter::optional<tag::state>,
 				       boost::parameter::optional<tag::action>,
 				       boost::parameter::optional<tag::confidfun>,
+				       boost::parameter::optional<tag::scorefun>,
 				       boost::parameter::optional<tag::selectfun>,
 				       boost::parameter::optional<tag::statsfun>,
 				       boost::parameter::optional<tag::stopcrit> > class_signature;
@@ -103,7 +110,8 @@ namespace hammer {
 	    class A3 = boost::parameter::void_,
 	    class A4 = boost::parameter::void_,
 	    class A5 = boost::parameter::void_,
-	    class A6 = boost::parameter::void_>
+	    class A6 = boost::parameter::void_,
+	    class A7 = boost::parameter::void_>
   class Hammer{
   public:
     typedef Params params_t;
@@ -112,16 +120,18 @@ namespace hammer {
       typedef Eigen::VectorXd state_t; // 1                                                                                                                   
       typedef Eigen::VectorXd action_t; // 2
       typedef confidupdator::Distance<Params> confidfun_t; // 3
-      typedef selector::Confidence<Params> selectfun_t; // 4
-      typedef boost::fusion::vector<stat::Predictions<Params>, stat::SelectedActions<Params>, stat::States<Params> > stat_t; // 4                               
-      typedef boost::fusion::vector< stop::MaxIterations<Params> > stop_t; // 5
+      typedef scoreupdator::Confidence<Params> scorefun_t; // 4
+      typedef selector::Max<Params> selectfun_t; // 5
+      typedef boost::fusion::vector<stat::Predictions<Params>, stat::SelectedActions<Params>, stat::States<Params> > stat_t; // 6                               
+      typedef boost::fusion::vector< stop::MaxIterations<Params> > stop_t; // 7
     };
 
     // extract the types                                                                                                                                                    
-    typedef typename class_signature::bind<A1, A2, A3, A4, A5, A6>::type args;
+    typedef typename class_signature::bind<A1, A2, A3, A4, A5, A6, A7>::type args;
     typedef typename boost::parameter::binding<args, tag::state, typename defaults::state_t>::type state_t;
     typedef typename boost::parameter::binding<args, tag::action, typename defaults::action_t>::type action_t;
     typedef typename boost::parameter::binding<args, tag::confidfun, typename defaults::confidfun_t>::type confidfun_t;
+    typedef typename boost::parameter::binding<args, tag::scorefun, typename defaults::scorefun_t>::type scorefun_t;
     typedef typename boost::parameter::binding<args, tag::selectfun, typename defaults::selectfun_t>::type selectfun_t;
     typedef typename boost::parameter::binding<args, tag::statsfun, typename defaults::stat_t>::type Stat;
     typedef typename boost::parameter::binding<args, tag::stopcrit, typename defaults::stop_t>::type StoppingCriteria;
@@ -134,7 +144,7 @@ namespace hammer {
     typedef std::function<state_t(action_t,state_t)> FM_t;
     typedef std::function<void(state_t,action_t,state_t)> Model_t;
     typedef std::function<const action_t&()> ActionReader_t;
-    typedef PairInterface<FM_t,action_t, state_t, ActionReader_t, confidfun_t> ModelPair_t;    
+    typedef PairInterface<FM_t,action_t, state_t, ActionReader_t, confidfun_t, scorefun_t> ModelPair_t;    
     typedef IMInterface<IM_t, action_t, state_t> IM_ITF_t;
 
 
@@ -305,13 +315,10 @@ namespace hammer {
 
     void _update_forwardPredictions(const state_t& current) 
     {
-      tbb::parallel_for_each(_forwardModels.begin(),_forwardModels.end(), [=](std::shared_ptr<ModelPair_t >& fm ) {(*fm)(current);} );
+      tbb::parallel_for_each(_forwardModels.begin(),_forwardModels.end(), [=](std::shared_ptr<ModelPair_t >& fm ) {(*fm)(current); (*fm).updateScore();} );
     }
 
-    typename std::shared_ptr<ModelPair_t> _selectAction() const
-    {
-      return *std::max_element(_forwardModels.begin(),_forwardModels.end(), _select);
-    }
+    typename std::shared_ptr<ModelPair_t> _selectAction() const { return _selector(_forwardModels);}
 
     void _update_confidence(const state_t& state)
     {
@@ -330,7 +337,7 @@ namespace hammer {
     std::string _res_dir;
     int _current_iteration;
     
-    selectfun_t _select;
+    selectfun_t _selector;
     stopping_criteria_t _stopping_criteria;
     stat_t _stat;
     state_t _currentState;
