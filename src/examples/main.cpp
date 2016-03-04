@@ -17,6 +17,7 @@
 #include "./hammer/forwardModels/gp.hpp"
 #include "./hammer/confidUpdator/distance.hpp"
 #include "./hammer/scoreUpdator/nearestTarget.hpp"
+#include "./hammer/selector/scoreProportionate.hpp"
 #include "./hammer/inverseModels/simple.hpp"
 
 
@@ -37,6 +38,8 @@ struct Params{
   };
   struct gp : public defaults::gp{};
   struct distance : public defaults::distance {};
+  struct opt_parallelrepeater : limbo::defaults::opt_parallelrepeater {};
+  struct opt_rprop : public limbo::defaults::opt_rprop {};
 }; 
 
 HMR_DECLARE_DYN_PARAM(Eigen::VectorXd,Params::hammer,target);
@@ -79,24 +82,34 @@ struct DummyGlucose{
 }
   State operator()(const Action& action ) {
     //GlucoseLv_mmol=randomGenerator.nextDouble()*8+4;//4-8-12
-    std::cout<< "received: "<<action<<std::endl;
-
-    if(std::abs(action[0] -4)<0.01)
-      glucose(0)+=0.2;
-    else if(std::abs(action[0]-3)<0.01) 
-      glucose[0]+=0.1;
-    else if(std::abs(action[0]-2)<0.01)
+    std::cout<< "received: "<<action.transpose()<<std::endl;
+    Action t(4);
+    t<<1,2,3,4;
+    int a=(t.transpose()*action).norm();
+    switch(a){
+    case 4:
+      glucose[0]+=0.2;
+      break;
+    case 3:
+    glucose[0]+=0.1;
+    break;
+    case 2:
       glucose[0]-=0.1;
-    //else assert(0);
-    glucose+=Eigen::VectorXd::Random(1)/3;
-    std::cout<< glucose<<std::endl;
-
+      break;
+    case 1:
+      break;
+    default:
+      assert(0);
+    }
+    //glucose+=Eigen::VectorXd::Random(1)/3;
+    std::cout<<"new glucose" << glucose<<std::endl;
+    
     return glucose;
   }
   State operator()( ) {   //for imitation learning
     return this->operator()(PerfectFM().predict(glucose,Params::hammer::target() ));
   }
-
+  
 };
 
 
@@ -116,10 +129,15 @@ int main (int argc, char *argv[])
 
 
   // Instatiation of the forward models
-  forwardModels::GP<Params> gp;
-  std::vector<Eigen::VectorXd> obs;
+  //typedef limbo::kernel::SquaredExpARD<Params> Kernel_t;
+  //typedef limbo::mean::Data<Params> Mean_t;
+  //forwardModels::GP<Params, Kernel_t, Mean_t, limbo::model::gp::KernelLFOpt<Params> > gp;
+  forwardModels::GP<Params > gp;
+
+
+  /*std::vector<Eigen::VectorXd> obs;
   std::vector<Eigen::VectorXd> samples;
-  for(size_t i=0;i<10;i++){
+    for(size_t i=0;i<100;i++){
     Action a=Eigen::VectorXd(1);
     a(0)=rand()%4+1;
     State s=exp.glucose;
@@ -128,22 +146,26 @@ int main (int argc, char *argv[])
     Eigen::VectorXd sam(2);
     sam<<s,a;
     samples.push_back(sam);
-  }
+    }
   gp.init(obs,samples);
-
+  */
   // Instantiation of the Inverse models;
-  Action v(1);
-  v(0)=1;
-  inverseModels::MonoVal<Action> im_1(v);
-  v(0)=2;
-  inverseModels::MonoVal<Action> im_2(v);
-  v(0)=3;
-  inverseModels::MonoVal<Action> im_3(v);
-  v(0)=4;
-  inverseModels::MonoVal<Action> im_4(v);
+  Action v=Action::Zero(4);
+  Action v1=v;
+  v1(0)=1;
+  inverseModels::MonoVal<Action> im_1(v1);
+  Action v2=v;
+  v2(1)=1;
+  inverseModels::MonoVal<Action> im_2(v2);
+  Action v3=v;
+  v3(2)=1;
+  inverseModels::MonoVal<Action> im_3(v3);
+  Action v4=v;
+  v4(3)=1;
+  inverseModels::MonoVal<Action> im_4(v4);
 
   // Instantiation of the architecture
-  Hammer<Params,scorefun<scoreupdator::NearestTarget<Params> > > hammer;
+  Hammer<Params,selectfun<hammer::selector::ScoreProportionate<Params> >,scorefun<scoreupdator::NearestTarget<Params> > > hammer;
 
  
   // Biding of the Inverse models
@@ -170,13 +192,14 @@ int main (int argc, char *argv[])
   std::cout<<"TARGET "<<Params::hammer::target()<<std::endl;    
   
   //hammer.learn(exp, Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
-  //hammer.run(exp, Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
-  
+  hammer.run(exp, Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
+  /*hammer.print_prediction();
   for(int i=0;i<100;i++)
     {
       Action a=hammer.suggestAction(Params::hammer::target(), Eigen::VectorXd::Random(1)*15);
+      hammer.print_prediction();
       hammer.updateModels(exp(a));
-    }
+      }*/
 
   return 0;
 }

@@ -72,7 +72,7 @@ namespace hammer {
     const State& getState() const {return _state;}
     double getConfidence() const {return _confidence; }
     void udpateConfidence(const State& state){_confidence=_confUpdator(state,_state,_confidence); } 
-    double getScore() const {return _confidence; }
+    double getScore() const {return _score; }
     void updateScore(){_score=_scoreUpdator(*this); } 
     const Action& getAction() const{return _imfun.operator()();}
   private:
@@ -185,7 +185,9 @@ namespace hammer {
 
       while (!this->_stop(*this)) {
 	_selectedAction=this->suggestAction(target,this->_currentState);
+	this->print_prediction();
 	state_t newState=system(_selectedAction); 
+
 	updateModels(newState);
 	this->_current_iteration++;
         this->_update_stats(*this);     
@@ -207,7 +209,7 @@ namespace hammer {
 	this->_update_forwardPredictions(_currentState);
 	//action_t selectedAction; // same here, how do we know the executed action;
 	state_t newState=system(); 
-	this->print_confidencePrediction();
+	this->print_prediction();
 	this->_update_confidence(newState);
 	//this->_update_models(_currentState, _selectedAction, _newState);
 	_currentState=newState;
@@ -278,9 +280,9 @@ namespace hammer {
     state_t getCurrentState()const {return _currentState;}
     action_t getSelectedAction()const {return _selectedAction;}
 
-    void print_confidencePrediction()const
+    void print_prediction()const
     {
-      std::for_each(_forwardModels.begin(),_forwardModels.end(), [=](const std::shared_ptr<ModelPair_t>& fm ) {std::cout<<"Conf: "<<(*fm).getConfidence()<< "  Pred: "<<(*fm).getState()<<std::endl;} );
+      std::for_each(_forwardModels.begin(),_forwardModels.end(), [=](const std::shared_ptr<ModelPair_t>& fm ) {std::cout<<"Conf: "<<(*fm).getConfidence()<<"  score: "<<(*fm).getScore()<< "  Pred: "<<(*fm).getState()<<std::endl;} );
     }
 
 
