@@ -129,10 +129,10 @@ int main (int argc, char *argv[])
 
 
   // Instatiation of the forward models
-  //typedef limbo::kernel::SquaredExpARD<Params> Kernel_t;
-  //typedef limbo::mean::Data<Params> Mean_t;
-  //forwardModels::GP<Params, Kernel_t, Mean_t, limbo::model::gp::KernelLFOpt<Params> > gp;
-  forwardModels::GP<Params > gp;
+  typedef limbo::kernel::SquaredExpARD<Params> Kernel_t;
+  typedef limbo::mean::Data<Params> Mean_t;
+  forwardModels::GP<Params, Kernel_t, Mean_t, limbo::model::gp::KernelLFOpt<Params> > gp;
+  //forwardModels::GP<Params > gp;
 
 
   /*std::vector<Eigen::VectorXd> obs;
