@@ -10,7 +10,8 @@ set (PROJECT_SOURCE_DIR ./src)
 set (PROJECT_BINARY_DIR ./bld)
 set (EXECUTABLE_OUTPUT_PATH ./bld)
 set (LIBRARY_OUTPUT_PATH ./lib)
-
+file(GLOB headers src/hammer/*.hpp)
+file(GLOB headers_sub src/hammer/*/*.hpp)
 
 # The version number.
 set (Hammer_VERSION_MAJOR 0)
@@ -24,9 +25,10 @@ configure_file (
   "${PROJECT_BINARY_DIR}/hammer/hammerConfig.h"
   )
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/${PROJECT_SOURCE_DIR}/cmake")
+
 find_package(Eigen3 REQUIRED) 
-find_package(TBB REQUIRED)
+find_package(TBB 4.2 REQUIRED)
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
@@ -53,10 +55,10 @@ include_directories(${TBB_INCLUDE_DIR})
 
 
 # add the executable
-add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp)
+add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp ${headers} ${headers_sub})
 
 # add libs
-link_directories("/usr/local/lib/, ${TBB_LIBRARY}")
+link_directories("/usr/local/lib/ ${TBB_LIBRARY}")
 
 
 target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES})
