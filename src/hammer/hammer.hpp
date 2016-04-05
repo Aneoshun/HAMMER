@@ -235,6 +235,13 @@ namespace hammer {
       _currentState=newState;
     }
 
+    void updateModels(const state_t& newState, const action_t& selectedAction) //update the models according to feedback from another executed action
+    {
+      this->_update_confidence(newState);
+      this->_update_models(_currentState, selectedAction, newState);
+      _currentState=newState;
+    }
+
     template<typename T, typename... Targs>
     void bindInverseModel( T& t,  Targs&... tt )
     {
