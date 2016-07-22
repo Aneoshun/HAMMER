@@ -19,13 +19,12 @@ namespace hammer {
     class Simple{
     public:
       Simple(){}
-      ~Simple(){std::cout<<"dead"<<std::endl;}
 
       Action predict(const State& current, const State& target){
-	Action a(2);
-	a<<12,33;
-	std::cout<<"test INVERSE send: "<<a<<std::endl;  
-	return a;
+	Action action(2);
+	action<<12,33;
+	std::cout<<"test INVERSE send: "<<action<<std::endl;  
+	return action;
       }
       void update(const Eigen::VectorXd& prev ,const Eigen::VectorXd& action, const Eigen::VectorXd& next){}
 

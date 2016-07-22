@@ -1,23 +1,23 @@
-#ifndef HAMMER_STOP_MAX_ITERATIONS_HPP
-#define HAMMER_STOP_MAX_ITERATIONS_HPP
+#ifndef HAMMER_STOP_TOLERANCE_HPP
+#define HAMMER_STOP_TOLERANCE_HPP
 
 #include <hammer/tools/macros.hpp>
 
 namespace hammer {
     namespace defaults {
-        struct stop_maxiterations {
-            HMR_PARAM(int, iterations, 190);
+        struct tolerance {
+            HMR_PARAM(double, tol, 0.1);
         };
     }
     namespace stop {
         template <typename Params>
-        struct MaxIterations {
-            MaxIterations() {}
+        struct Tolerance {
+            Tolerance() {}
 
             template <typename HMR>
             bool operator()(const HMR& hmr,const typename HMR::state_t& target)
             {
-                return hmr.current_iteration() >= Params::stop_maxiterations::iterations();
+	      return (hmr.getCurrentState()-target).norm() <= Params::tolerance::tol();
             }
         };
     }

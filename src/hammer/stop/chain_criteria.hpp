@@ -6,16 +6,17 @@ namespace hammer {
         template <typename HMR>
         struct ChainCriteria {
             typedef bool result_type;
-            ChainCriteria(const HMR& hmr) : _hmr(hmr){}
+	  ChainCriteria(const HMR& hmr,const typename HMR::state_t& target) : _hmr(hmr), _target(target){}
 
             template <typename stopping_criterion>
             bool operator()(bool state, stopping_criterion stop) const
             {
-                return state || stop(_hmr);
+	      return state || stop(_hmr, _target);
             }
 
         protected:
-            const HMR& _hmr;
+	  const HMR& _hmr;
+	  const typename HMR::state_t& _target;
 	};
     }
 }

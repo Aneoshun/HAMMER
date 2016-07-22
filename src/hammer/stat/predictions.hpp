@@ -20,7 +20,11 @@ namespace hammer {
 	}
 	
 	(*this->_log_file) << hmr.current_iteration() << ": "<< std::endl;
-	std::for_each(hmr.getPairInterfaces().begin(),hmr.getPairInterfaces().end(), [=](const std::shared_ptr<typename HMR::ModelPair_t>& fm ) {(*this->_log_file) <<"      Conf: "<<(*fm).getConfidence()<< "  Pred state: "<<(*fm).getState()<<"   Suggest action: "<<(*fm).getAction()<<std::endl;} );
+	std::for_each(hmr.getPairInterfaces().begin(),hmr.getPairInterfaces().end(), [=](const std::shared_ptr<typename HMR::ModelPair_t>& fm ) {
+	    (*this->_log_file) <<"  Conf: "<<(*fm).getConfidence();
+	    (*this->_log_file) <<"  Score: "<<(*fm).getScore();
+	    (*this->_log_file) <<"  Pred state: "<<this->convert((*fm).getState());
+	    (*this->_log_file) <<"  Suggest action: "<<this->convert((*fm).getAction())<<std::endl;} );
       }
     };
   }

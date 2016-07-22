@@ -7,10 +7,10 @@ namespace hammer{
   namespace scoreupdator{
     template<typename Params>
     struct NearestTarget{
-      template<typename T1>
-      double operator()(const T1& t1)const
+      template<typename T1, typename State>
+      double operator()(const T1& t1, const State& target)const
       {
-        return -(t1.getState()-Params::hammer::target()).norm(); // negative value in order to be compatible with Max selector
+        return -(t1.getState()-target).norm(); // negative value in order to be compatible with Max selector
       }
     };
   }

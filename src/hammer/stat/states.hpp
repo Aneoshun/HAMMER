@@ -19,7 +19,7 @@ namespace hammer {
 	  (*this->_log_file) << "#iteration observation" << std::endl;
 	}
 	
-	(*this->_log_file) << hmr.current_iteration() << ": "<< hmr.getCurrentState()<<std::endl;
+	(*this->_log_file) << hmr.current_iteration() << ": "<< this->convert(hmr.getCurrentState())<<std::endl;
       }
     };
   }

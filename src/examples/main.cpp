@@ -1,35 +1,30 @@
-// A simple program that computes the square root of a number
-//#define  EIGEN_DONT_PARALLELIZE
 #include <iostream>
 #include <algorithm>    // std::max
 
-#include <stdio.h>      /* printf, NULL */
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
 
 #define EIGEN_STACK_ALLOCATION_LIMIT 3000000
 
 
 
-#include "./hammer/hammerConfig.h"
+
 #include "./hammer/hammer.hpp"
-#include "./hammer/forwardModels/simple.hpp"
-#include "./hammer/forwardModels/gp.hpp"
-#include "./hammer/confidUpdator/distance.hpp"
-#include "./hammer/scoreUpdator/nearestTarget.hpp"
-#include "./hammer/selector/scoreProportionate.hpp"
-#include "./hammer/inverseModels/simple.hpp"
 
 
 using namespace hammer;
 
 // Definition of the parameters
 struct Params{
+struct kernel_squared_exp_ard {
+    BO_PARAM(int, k, 0); //equivalent to the standard exp ARD
+    BO_PARAM(double, sigma_sq, 1);
+  };
+
   struct kernel_exp {
     HMR_PARAM(double, sigma, 0.25);
   };
   struct hammer{
     HMR_DYN_PARAM(Eigen::VectorXd, target);
+    HMR_PARAM_STRING(name, "Hammer")
     HMR_PARAM(bool, stats_enabled, true);
   };
 
@@ -169,7 +164,6 @@ int main (int argc, char *argv[])
 
  
   // Biding of the Inverse models
-  //hammer.bindInverseModel(im_5);
   hammer.bindInverseModel(im_1);
   hammer.bindInverseModel(im_2);
   hammer.bindInverseModel(im_3);

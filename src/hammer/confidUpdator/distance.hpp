@@ -11,6 +11,7 @@ namespace hammer{
       struct distance {
 	HMR_PARAM(double, offset, 0);
 	HMR_PARAM(double, rate, 1);
+	HMR_PARAM(double, diff, 1);
 
       };
     }
@@ -18,13 +19,16 @@ namespace hammer{
   namespace confidupdator{
     template<typename Params>
     struct Distance{
-      double  operator()(const int& newVal,const int& prevVal,double confidence) const
+      double  operator()(double confidence, int newState, int prevState, int suggested=0, int executed=0) const
       {      
-	return confidence + (Params::distance::offset() - std::abs(newVal-prevVal))*Params::distance::rate();
+	return confidence + (Params::distance::offset() - std::abs(newState-prevState))*Params::distance::rate()*(1-std::min( std::fabs(executed-suggested), Params::distance::diff())/Params::distance::diff());
       }
-      double  operator()(const Eigen::VectorXd& newVal,const Eigen::VectorXd& prevVal,double confidence)const
+      double  operator()(double confidence,const Eigen::VectorXd& newState, const Eigen::VectorXd& prevState, const Eigen::VectorXd& executed=Eigen::VectorXd::Zero(1), const Eigen::VectorXd& suggested=Eigen::VectorXd::Zero(1)) const
       {
-	return confidence + (Params::distance::offset() - (newVal-prevVal).norm())*Params::distance::rate();
+	return confidence +
+	  (Params::distance::offset() - (newState-prevState).norm()) *
+	  Params::distance::rate() *
+	  (1-std::min( (executed-suggested).norm() , Params::distance::diff())/Params::distance::diff());
       }
     };
     

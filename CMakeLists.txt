@@ -27,6 +27,11 @@ configure_file (
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(Eigen3 REQUIRED) 
 find_package(TBB REQUIRED)
+find_package(NLopt)
+if(NLOPT_FOUND)
+	add_definitions(-DUSE_NLOPT)
+endif()
+
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
@@ -54,10 +59,12 @@ include_directories(${TBB_INCLUDE_DIR})
 
 # add the executable
 add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp)
+add_executable(test_hier ${PROJECT_SOURCE_DIR}/examples/test_hier.cpp)
 
 # add libs
 link_directories("/usr/local/lib/, ${TBB_LIBRARY}")
 
 
-target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
+target_link_libraries(test_hier ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
     

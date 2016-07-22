@@ -21,6 +21,17 @@ namespace hammer {
         protected:
             std::shared_ptr<std::ofstream> _log_file;
 
+	  template<typename Data>
+	  const Data& convert(const Data& data){return data;} //does nothing
+
+
+	  const Eigen::MatrixXd convert(const Eigen::VectorXd& data){//tranposes the data
+	    if(data.rows()>1)
+	      return data.transpose();
+	    else
+	      return data;
+	  } 
+
             template <typename HMR>
             void _create_log_file( const HMR& hmr, const std::string& name)
             {

@@ -19,7 +19,7 @@ namespace hammer {
 	  (*this->_log_file) << "#iteration observation" << std::endl;
 	}
 	
-	(*this->_log_file) << hmr.current_iteration() << ": "<< hmr.getSelectedAction()<<std::endl;
+	(*this->_log_file) << hmr.current_iteration() << ": "<< this->convert(hmr.getSelectedAction())<<std::endl;
       }
     };
   }
