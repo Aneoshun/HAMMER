@@ -10,7 +10,8 @@ set (PROJECT_SOURCE_DIR ./src)
 set (PROJECT_BINARY_DIR ./bld)
 set (EXECUTABLE_OUTPUT_PATH ./bld)
 set (LIBRARY_OUTPUT_PATH ./lib)
-
+file(GLOB headers src/hammer/*.hpp)
+file(GLOB headers_sub src/hammer/*/*.hpp)
 
 # The version number.
 set (Hammer_VERSION_MAJOR 0)
@@ -24,9 +25,10 @@ configure_file (
   "${PROJECT_BINARY_DIR}/hammer/hammerConfig.h"
   )
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-find_package(Eigen3 REQUIRED) 
-find_package(TBB REQUIRED)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/${PROJECT_SOURCE_DIR}/cmake")
+
+find_package(Eigen3 
+find_package(TBB 4.2 REQUIRED)
 find_package(NLopt)
 if(NLOPT_FOUND)
 	add_definitions(-DUSE_NLOPT)
@@ -62,7 +64,7 @@ add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp)
 add_executable(test_hier ${PROJECT_SOURCE_DIR}/examples/test_hier.cpp)
 
 # add libs
-link_directories("/usr/local/lib/, ${TBB_LIBRARY}")
+link_directories("/usr/local/lib/ ${TBB_LIBRARY}")
 
 
 target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})

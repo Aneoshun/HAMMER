@@ -21,6 +21,8 @@
 # Copyright (c) 2009 Benoit Jacob <jacob.benoit.1@gmail.com>
 # Redistribution and use is allowed according to the terms of the 2-clause BSD license.
 
+MESSAGE( "====> FindEigen3.cmake has been found!" )
+
 if(NOT Eigen3_FIND_VERSION)
   if(NOT Eigen3_FIND_VERSION_MAJOR)
     set(Eigen3_FIND_VERSION_MAJOR 2)
@@ -87,3 +89,4 @@ else (EIGEN3_INCLUDE_DIR)
   mark_as_advanced(EIGEN3_INCLUDE_DIR)
 
 endif(EIGEN3_INCLUDE_DIR)
+

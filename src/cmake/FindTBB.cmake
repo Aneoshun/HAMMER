@@ -80,6 +80,8 @@
 # * TBB_LIBRARIES    - The libraries to link against to use TBB.
 # * TBB_DEFINITIONS  - Definitions to use when compiling code that uses TBB.
 
+MESSAGE( "====> FindTBB.cmake has been found!" )
+
 include(FindPackageHandleStandardArgs)
 
 if(NOT TBB_FOUND)
