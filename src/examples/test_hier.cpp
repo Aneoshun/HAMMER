@@ -9,6 +9,7 @@
 
 
 #include "./hammer/hammer.hpp"
+
 #include "./vehicle.hpp"
 
 using namespace hammer;
@@ -71,8 +72,8 @@ struct Params2{
     HMR_PARAM(double, offset, 0);
     HMR_PARAM(double, rate, 1);
     HMR_PARAM(double, diff, 0.1);
-    
   };
+
   struct opt_parallelrepeater : limbo::defaults::opt_parallelrepeater {};
   struct opt_rprop : public limbo::defaults::opt_rprop {};
 }; 
@@ -261,15 +262,27 @@ int main (int argc, char *argv[])
 
   hammer2.printStructure();
   
+
+  typedef boost::fusion::vector<Vehicle, hmr_t, hmr2_t> compo_t;
+  Hierarchy<3,compo_t> hierarchy;
+
+  hierarchy.bindInverseModel<1>(im_1, im_2, im_3, im_4, im_5, im_6, im_7, im_8, im_9);
+  hierarchy.bindForwardModel<1>(LLS,gp);
+  
+  hierarchy.bindInverseModel<2>(SM,pid,fmopt);
+  hierarchy.bindForwardModel<2>(gp2);
+
   
   
   // Definition of the target
   Eigen::VectorXd target(3);
   target<<1,3,-2;
+  std::cout<<"TARGET "<<target.transpose()<<std::endl;
 
-  std::cout<<"TARGET "<<target<<std::endl;
 
-
+  hierarchy.printStructure();
+  hierarchy.run(target);
+  return 0;
   //hammer2.run( car ,target, Eigen::VectorXd::Zero(3));
   //return 0;
   
@@ -278,10 +291,10 @@ int main (int argc, char *argv[])
 
 
 
-  HMRwrapper<hmr_t, Vehicle > hmrwrp(hammer, car) ;
+  //HMRwrapper<hmr_t, Vehicle > hmrwrp(hammer, car) ;
 
   //Execution of the architecture
-  hammer2.run( hmrwrp,target, Eigen::VectorXd::Zero(3),true);
+  //hammer2.run( hmrwrp,target, Eigen::VectorXd::Zero(3),true);
 
 
   return 0;

@@ -85,8 +85,8 @@ namespace hammer {
     typedef typename boost::parameter::binding<args, tag::statsfun, typename defaults::stat_t>::type Stat;
     typedef typename boost::parameter::binding<args, tag::stopcrit, typename defaults::stop_t>::type StoppingCriteria;
     
-    typedef typename boost::mpl::if_<boost::fusion::traits::is_sequence<StoppingCriteria>, StoppingCriteria, boost::fusion::vector<StoppingCriteria>>::type stopping_criteria_t;
-    typedef typename boost::mpl::if_<boost::fusion::traits::is_sequence<Stat>, Stat, boost::fusion::vector<Stat>>::type stat_t;
+    typedef typename boost::mpl::if_<boost::fusion::traits::is_sequence<StoppingCriteria>, StoppingCriteria, boost::fusion::vector<StoppingCriteria> >::type stopping_criteria_t;
+    typedef typename boost::mpl::if_<boost::fusion::traits::is_sequence<Stat>, Stat, boost::fusion::vector<Stat> >::type stat_t;
 
 
     typedef std::function<action_t(state_t,state_t)> IM_t;

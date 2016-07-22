@@ -27,7 +27,7 @@ configure_file (
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/${PROJECT_SOURCE_DIR}/cmake")
 
-find_package(Eigen3 
+find_package(Eigen3)
 find_package(TBB 4.2 REQUIRED)
 find_package(NLopt)
 if(NLOPT_FOUND)
@@ -54,7 +54,6 @@ include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/")
 include_directories("${PROJECT_SOURCE_DIR}/../submodules/limbo/src/")
 
-
 include_directories(${EIGEN3_INCLUDE_DIR})  
 include_directories(${TBB_INCLUDE_DIR})  
 
@@ -69,4 +68,3 @@ link_directories("/usr/local/lib/ ${TBB_LIBRARY}")
 
 target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
 target_link_libraries(test_hier ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
-    
