@@ -9,6 +9,7 @@ public:
     _vit(Eigen::VectorXd::Zero(2)),
     _pos(Eigen::VectorXd::Zero(3)),
     _state(Eigen::VectorXd::Zero(5)),
+    _theta(0),
     file("complete_state.dat")
   {
   }
@@ -16,8 +17,10 @@ public:
   Eigen::VectorXd getCurrentState(int level=0){
     if(level==0)
       return _vit;
+    else if(level==1)
+      return _state;
     else
-      return _pos;
+      return _pos.tail(2);
   }
   
   Eigen::VectorXd operator()(Eigen::VectorXd v){
@@ -33,11 +36,15 @@ public:
     return getCurrentState(0);
   }
 
+
+
+  
 private:
   Eigen::VectorXd _vmot; //vmot1, vmot2
   Eigen::VectorXd _vit; //theta p, v point
-  Eigen::VectorXd _pos;// theta , x, y
+  Eigen::VectorXd _pos;// cos theta, sin theta , x, y
   Eigen::VectorXd _state;// vit, pos
+  double _theta;
   std::ofstream file;
 
   void update_state(){
@@ -46,6 +53,7 @@ private:
     _state(2)=_pos(0);
     _state(3)=_pos(1);
     _state(4)=_pos(2);
+
   }
   
   void complete_system(Eigen::VectorXd v){
@@ -55,32 +63,33 @@ private:
 
   
   void lowLevel(Eigen::VectorXd v){
-    _vmot+=v/2;
-    /*    if (vmot(0)>10)
-      vmot(0)=10;
-    if (vmot(0)<-10)
-      vmot(0)=-10;
+    _vmot+=v/10;
+    if (_vmot(0)>1)
+      _vmot(0)=1;
+    if (_vmot(0)<-1)
+      _vmot(0)=-1;
 
-    if (vmot(1)>10)
-      vmot(1)=10;
-    if (vmot(1)<-10)
-    vmot(1)=-10;*/
+    if (_vmot(1)>1)
+      _vmot(1)=1;
+    if (_vmot(1)<-1)
+      _vmot(1)=-1;
 
-    _vit(0)= (_vmot(0) - _vmot(1)) / 500;
-    _vit(1)= (_vmot(0) + _vmot(1)) / 100;
+    
+    _vit(0)= (_vmot(0) - _vmot(1));
+    _vit(1)= (_vmot(0) + _vmot(1));
 
   }
 
   void highLevel(Eigen::VectorXd vit){
-    _pos(0)+=vit(0)/10;
-    if(_pos(0)>M_PI)
-      _pos(0)-=2*M_PI;
-    if(_pos(0)<-M_PI)
-      _pos(0)+=2*M_PI;
+    _theta+=vit(0)/100;
+    if(_theta>M_PI)
+      _theta-=2*M_PI;
+    if(_theta<-M_PI)
+      _theta+=2*M_PI;
 
-    _pos(1)+=vit(1)*cos(_pos(0))/10;
-    _pos(2)+=vit(1)*sin(_pos(0))/10;
-
+    _pos(0)=_theta;
+    _pos(1)+=vit(1)*cos(_theta)/25;
+    _pos(2)+=vit(1)*sin(_theta)/25;
   }
 
 

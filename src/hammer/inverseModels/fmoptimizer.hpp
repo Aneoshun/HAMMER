@@ -10,21 +10,24 @@ public:
   
   Eigen::VectorXd predict(const Eigen::VectorXd& current, const Eigen::VectorXd& target)
   {
-    _current=current;
-    _target=target;
-    limbo::opt::NLOptNoGrad<ParamsNoGrad, nlopt::GN_DIRECT> direct;
-    Eigen::VectorXd res_direct = direct(*this, limbo::tools::random_vector(_dim_in), true);
-    return res_direct;
+    limbo::opt::NLOptNoGrad<ParamsNoGrad,  nlopt::LN_BOBYQA> BOBYQA;
+    Eigen::VectorXd res = BOBYQA(F(current,target,_fm), limbo::tools::random_vector(_dim_in), false);
+    return res;
   }
   void update(const Eigen::VectorXd& prev ,const Eigen::VectorXd& action, const Eigen::VectorXd& next){}
   
-
+  struct F{
+    F(const Eigen::VectorXd& current, const Eigen::VectorXd& target, const FM& fm):_current(current),_target(target),_fm(fm){}
+    limbo::opt::eval_t operator()(const Eigen::VectorXd& params, bool eval_grad = false) const
+    {
+      double v = -(_fm.predict(params,_current)-_target).norm();
+      return limbo::opt::no_grad(v);
+    }
+    Eigen::VectorXd _current;
+    Eigen::VectorXd _target;
+    const FM& _fm;
+  };
   
-  limbo::opt::eval_t operator()(const Eigen::VectorXd& params, bool eval_grad = false) const
-  {
-    double v = -(_fm.predict(params,_current)-_target).norm();
-    return limbo::opt::no_grad(v);
-  }
 
 private:  
   struct ParamsNoGrad {
@@ -33,8 +36,6 @@ private:
     };
   };
   
-  Eigen::VectorXd _current;
-  Eigen::VectorXd _target;
   const FM& _fm;
   size_t _dim_in;
   

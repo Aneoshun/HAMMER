@@ -12,7 +12,7 @@ namespace hammer {
       struct gp {
 	HMR_PARAM(double, noise, 1e-6);
 	HMR_PARAM(int, hp_period, 0);
-
+	HMR_PARAM(bool, transition, true);
       };
     }
   namespace forwardModels{
@@ -20,18 +20,34 @@ namespace hammer {
     class GP{
     public:
       GP(int dim_in=1, int dim_out=1):_gp(dim_in,dim_out){}
+
       Eigen::VectorXd predict (const Eigen::VectorXd& action, const Eigen::VectorXd& current) const{
+	
 	Eigen::VectorXd x(current.rows() + action.rows());
 	x<<current,action;
-	return _gp.mu(x)+current;
+	if( Params::gp::transition())
+	  return _gp.mu(x)+current;
+	else
+	  return _gp.mu(x);
 	
       }
+
+      double uncertainty (const Eigen::VectorXd& action, const Eigen::VectorXd& current) const{
+	Eigen::VectorXd x(current.rows() + action.rows());
+	x<<current,action;
+	return _gp.sigma(x);
+	
+      }
+
       
       void update(const Eigen::VectorXd& prev ,const Eigen::VectorXd& action, const Eigen::VectorXd& next){
-	Eigen::VectorXd sample(prev.rows()+action.rows());
+       	Eigen::VectorXd sample(prev.rows()+action.rows());
 	sample<<prev,action;
 	std::lock_guard<std::mutex> lock(_mutex);
-	_observations.push_back(next-prev);
+	if( Params::gp::transition() )
+	  _observations.push_back(next-prev);
+	else
+	  _observations.push_back(next);
 	_samples.push_back(sample);
 	_gp.compute(_samples,_observations,Eigen::VectorXd::Constant(this->_observations.size(), Params::gp::noise()));
 	if (Params::gp::hp_period() > 0

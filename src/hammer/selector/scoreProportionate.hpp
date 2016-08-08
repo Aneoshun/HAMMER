@@ -16,20 +16,31 @@ namespace hammer{
 	std::pair<double, double> res = getMinAndSum(pairs);
 	double min=res.first;
 	double sum=res.second-min*pairs.size();
+
+	if(sum<1e-10)
+	  {
+	    //std::cout<<"here"<<std::endl;
+	    tools::rgen_int_t rgen(0, pairs.size()-1);
+	    int ind = rgen.rand();
+	    return pairs[ind];
+	  }
+
 	tools::rgen_double_t rgen(0.0, sum);
 	double r = rgen.rand();    
 	//double r= misc::rand((double) sum);
-
+	//std::cout<<"r: " <<r<<"  "<<sum<<std::endl;
 
 	itc_t it=pairs.cbegin();
 	double p = ((*it)->getScore()-min);
-	
+	//std::cout<<"P: " <<p<<std::endl;
 	while (p<r && it!=pairs.end())
 	  {
-	    
 	    it++;
 	    p+=((*it)->getScore()-min);
+	    //std::cout<<"P: " <<p<<std::endl;
 	  }
+	assert(it!=pairs.end());
+
 	return *it;
 	
       }

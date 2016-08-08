@@ -17,7 +17,8 @@ namespace hammer {
             template <typename HMR>
             bool operator()(const HMR& hmr,const typename HMR::state_t& target)
             {
-	      return (hmr.getCurrentState()-target).norm() <= Params::tolerance::tol();
+	      
+	      return (hmr.getCurrentState()-target).cwiseProduct(Params::nearesttarget::proj()).norm() <= Params::tolerance::tol();
             }
         };
     }
