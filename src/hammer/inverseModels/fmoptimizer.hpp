@@ -1,5 +1,6 @@
 #ifndef FMOPTIMIZER_IM_HPP
 #define FMOPTIMIZER_IM_HPP
+#ifdef USE_NLOPT
 
 template<typename FM>
 class FMOptimizer{
@@ -39,4 +40,5 @@ private:
   size_t _dim_in;
   
 };
+#endif
 #endif

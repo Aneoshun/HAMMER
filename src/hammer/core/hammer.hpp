@@ -133,10 +133,9 @@ namespace hammer {
       _currentState=initState;  
 
       do {
-	_selectedAction=this->suggestAction(target,this->_currentState);
 	if(disp_pred)
 	  this->print_prediction();
-	state_t newState=system(_selectedAction); 
+	state_t newState=system(this->suggestAction(target,this->_currentState)); 
 
 	updateModels(newState);
 	this->_current_iteration++;
@@ -174,14 +173,15 @@ namespace hammer {
       assert(_inverseModels.size()!=0 && _forwardModels.size()!=0);
       this->_update_inversePredictions(currentState, target);
       this->_update_forwardPredictions(currentState, target);
-      _selectedAction=_selectAction()->getAction();
-      return _selectedAction;
+      _selectedPair=_selectAction();
+      return _selectedPair->getAction();
+      
     }
 
     void updateModels(const state_t& newState)
     {
-      this->_update_confidence(newState, _selectedAction);
-      this->_update_models(_currentState, _selectedAction, newState);
+      this->_update_confidence(newState, _selectedPair->getAction());
+      this->_update_models(_currentState, _selectedPair->getAction(), newState);
       _currentState=newState;
     }
     //Update the model when the action performed on the system comes from another source
@@ -235,8 +235,9 @@ namespace hammer {
     int current_iteration() const { return _current_iteration; }
     const std::vector< std::shared_ptr<ModelPair_t> >& getPairInterfaces() const {return _forwardModels;}
     state_t getCurrentState()const {return _currentState;}
-    action_t getSelectedAction()const {return _selectedAction;}
-
+    action_t getSelectedAction()const {return _selectedPair->getAction();}
+    const std::shared_ptr<ModelPair_t> & getSelectedPair()const{return _selectedPair;}
+    
     void print_prediction()const
     {
       std::for_each(_forwardModels.begin(),_forwardModels.end(), [=](const std::shared_ptr<ModelPair_t>& fm ) {std::cout<<"Conf: "<<(*fm).getConfidence()<<"  score: "<<(*fm).getScore()<< "  Pred: "<<(*fm).getState()<<std::endl;} );
@@ -304,7 +305,7 @@ namespace hammer {
     stopping_criteria_t _stopping_criteria;
     stat_t _stat;
     state_t _currentState;
-    action_t _selectedAction;
+    std::shared_ptr<ModelPair_t>  _selectedPair;
     std::vector<std::shared_ptr<IM_ITF_t > > _inverseModels;  //shared ptr are necessary for the bindings: the ref of the vector changes when pushing elements
     std::vector< std::shared_ptr<ModelPair_t> > _forwardModels;
     std::vector<FM_t> _fmFun;
