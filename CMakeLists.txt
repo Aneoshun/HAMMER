@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wall -Ofast")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wall -Ofast -ggdb")
 
 project (HAMMER)
 
@@ -60,11 +60,11 @@ include_directories(${TBB_INCLUDE_DIR})
 
 # add the executable
 add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp)
-add_executable(test_hier ${PROJECT_SOURCE_DIR}/examples/test_hier.cpp)
+add_executable(hier_arm ${PROJECT_SOURCE_DIR}/examples/hier_arm.cpp ${PROJECT_SOURCE_DIR}/examples/arm_hori.cpp)
 
 # add libs
 link_directories("/usr/local/lib/ ${TBB_LIBRARY}")
 
 
 target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
-target_link_libraries(test_hier ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
+target_link_libraries(hier_arm ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
