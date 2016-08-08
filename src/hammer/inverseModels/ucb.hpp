@@ -1,6 +1,8 @@
 #ifndef UCB_IM_HPP
 #define UCB_IM_HPP
 
+
+#ifdef USE_NLOPT
 template<typename Params, typename FM>
 class UCB_FMOptimizer{
 public:
@@ -39,4 +41,5 @@ private:
   size_t _dim_in;
   
 };
+#endif
 #endif
