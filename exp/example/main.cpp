@@ -15,11 +15,11 @@ using namespace hammer;
 // Definition of the parameters
 struct Params{
 struct kernel_squared_exp_ard {
-    BO_PARAM(int, k, 0); //equivalent to the standard exp ARD
-    BO_PARAM(double, sigma_sq, 1);
+    HMR_PARAM(int, k, 0); //equivalent to the standard exp ARD
+    HMR_PARAM(double, sigma_sq, 1);
   };
   struct nearesttarget{
-    HMR_PARAM_VECTOR(double, proj, 1,1 );
+    HMR_PARAM_VECTOR(double, proj, 1 );
   };
   
   struct kernel_exp {
