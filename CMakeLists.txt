@@ -59,14 +59,14 @@ include_directories(${TBB_INCLUDE_DIR})
 
 
 # add the executable
-add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp)
+# add_executable(hammerExample ${PROJECT_SOURCE_DIR}/examples/main.cpp)
 add_executable(hier_arm ${PROJECT_SOURCE_DIR}/examples/hier_arm.cpp ${PROJECT_SOURCE_DIR}/examples/arm_hori.cpp)
 
 # add libs
 link_directories("/usr/local/lib/ ${TBB_LIBRARY}")
 
 
-target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
+#target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
 target_link_libraries(hier_arm ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
 
 
