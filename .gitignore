@@ -1,6 +1,5 @@
 bld/
 build/
-exp/*
 .DS_Store
 *~
 CMakeCache.txt
