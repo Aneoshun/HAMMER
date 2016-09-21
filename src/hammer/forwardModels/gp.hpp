@@ -50,8 +50,7 @@ namespace hammer {
 	  _observations.push_back(next);
 	_samples.push_back(sample);
 	_gp.compute(_samples,_observations,Eigen::VectorXd::Constant(this->_observations.size(), Params::gp::noise()));
-	if (Params::gp::hp_period() > 0
-	    && (_samples.size() + 1) % Params::gp::hp_period() == 0)
+	if (Params::gp::hp_period() > 0 && (_samples.size() + 1) % Params::gp::hp_period() == 0)
 	  _gp.optimize_hyperparams();
 	
       }

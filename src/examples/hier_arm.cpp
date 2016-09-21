@@ -48,7 +48,7 @@ struct Params{
   
   struct pseudomax : public selector::defaults::pseudomax{};
 
-  struct kernel_maternfivehalfs {
+  struct kernel_maternfivehalves {
     /// @ingroup kernel_defaults
     BO_PARAM(double, sigma_sq, 1);
     /// @ingroup kernel_defaults

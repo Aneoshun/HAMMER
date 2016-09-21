@@ -7,8 +7,8 @@ project (HAMMER)
 #file(src/*)
 
 set (PROJECT_SOURCE_DIR ./src)
-set (PROJECT_BINARY_DIR ./bld)
-set (EXECUTABLE_OUTPUT_PATH ./bld)
+set (PROJECT_BINARY_DIR ./bin)
+set (EXECUTABLE_OUTPUT_PATH ./bin)
 set (LIBRARY_OUTPUT_PATH ./lib)
 file(GLOB headers src/hammer/*.hpp)
 file(GLOB headers_sub src/hammer/*/*.hpp)
@@ -68,3 +68,7 @@ link_directories("/usr/local/lib/ ${TBB_LIBRARY}")
 
 target_link_libraries(hammerExample ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
 target_link_libraries(hier_arm ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${NLOPT_LIBRARIES})
+
+
+add_subdirectory(./exp/)
+
